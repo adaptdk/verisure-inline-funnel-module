@@ -1,0 +1,6 @@
+inline_funnel:
+  version: 1.x
+  js:
+    js/inline-funnel.js: {}
+  dependencies:
+    - core/drupal

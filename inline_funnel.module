@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * Contains inline_funnel.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function inline_funnel_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the inline_funnel module.
+    case 'help.page.inline_funnel':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Verisure Inline Funnel') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+define('DEMOMODULE_LIBRARY_PATH', '/libraries/demo-module-library');
+
+/**
+ * Implements hook_library_info_build().
+ *
+ * @return array
+ */
+function demomodule_library_info_build() {
+
+    $library = [];
+
+    foreach (danmark_testen_get_asset_paths() as $type => $path) {
+        if ($type === 'service-worker.js') {
+            continue;
+        }
+
+        switch (pathinfo($path, PATHINFO_EXTENSION)) {
+            case 'js':
+                $library['js'][$path] = [];
+                break;
+
+            case 'css':
+                $library['css']['base'][$path] = [];
+                break;
+        }
+    }
+
+    return $library ? ['demomodule' => $library] : [];
+}
+
+
+/**
+ * @return array
+ */
+function danmark_testen_get_asset_paths(): array {
+    $manifest_path = sprintf(
+        '%s/asset-manifest.json',
+        demomodule_path_to_library()
+    );
+
+    if ($manifest = json_decode(file_get_contents($manifest_path), TRUE)) {
+        return $manifest;
+    }
+
+    return [];
+}
+
+
+/**
+ * @return string
+ */
+function demomodule_path_to_library(): string {
+    return DRUPAL_ROOT . DEMOMODULE_LIBRARY_PATH;
+}

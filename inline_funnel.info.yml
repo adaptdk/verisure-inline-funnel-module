@@ -1,0 +1,5 @@
+name: 'inline-funnel'
+type: module
+description: 'Verisure Inline Funnel'
+core: 8.x
+package: 'Custom'
