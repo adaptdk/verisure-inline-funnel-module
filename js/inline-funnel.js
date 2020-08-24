@@ -2,7 +2,6 @@
 
 Drupal.behaviors.inlineFunnel = {
   attach: function (context, settings) {
-    console.log(settings);
     function loadFile(path, type){
       if (type === "js"){
         const script = document.createElement('script');

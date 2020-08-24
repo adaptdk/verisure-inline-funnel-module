@@ -7,7 +7,7 @@ use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Provides a 'Hello' Block.
+ * Provides an inline funnel block.
  *
  * @Block(
  *   id = "inline_funnel",
@@ -23,11 +23,10 @@ class InlineFunnel extends BlockBase implements BlockPluginInterface
     public function build()
     {
         $config = $this->getConfiguration();
-        //dd($config);
-        //var_dump($config); die;
+
         if (isset($config['funnel_host'])) {
             return [
-                '#markup' => $this->t('Hello, World!'),
+                '#markup' => '<div id="funnel"></div>',
                 '#attached' => [
                     'library' => [
                         'inline_funnel/inline_funnel',
