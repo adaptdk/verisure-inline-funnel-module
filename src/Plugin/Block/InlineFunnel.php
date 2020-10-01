@@ -31,7 +31,11 @@ class InlineFunnel extends BlockBase implements BlockPluginInterface
                     'library' => [
                         'inline_funnel/inline_funnel',
                     ],
-                    'drupalSettings' => ['inline_funnel' => ['funnel_host' => $config['funnel_host']]]
+                    'drupalSettings' => [
+                        'inline_funnel' => [
+                            'funnel_host' => $config['funnel_host'],
+                        ],
+                    ],
                 ],
             ];
         }
