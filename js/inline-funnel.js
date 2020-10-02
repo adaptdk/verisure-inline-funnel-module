@@ -4,14 +4,14 @@ Drupal.behaviors.inlineFunnel = {
   attach: function (context, settings) {
     function loadFile(path, type){
       if (type === "js"){
-        const script = document.createElement('script');
+        var script = document.createElement('script');
         script.setAttribute("type","text/javascript");
         script.setAttribute("src", path);
         document.getElementsByTagName("body")[0].appendChild(script);
       }
 
       if (type === "css"){
-        const link = document.createElement("link");
+        var link = document.createElement("link");
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("type", "text/css");
         link.setAttribute("href", path);
@@ -20,20 +20,42 @@ Drupal.behaviors.inlineFunnel = {
     }
 
     function loadFilesFromManifest(inlineBuildPath) {
-      window.addEventListener('DOMContentLoaded', (event) => {
-        fetch(`${inlineBuildPath}/asset-manifest.json`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.entrypoints === undefined) {
-              console.error('Could not find entrypoints');
-              return;
+      window.addEventListener('DOMContentLoaded', function(event) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', inlineBuildPath + '/asset-manifest.json', true);
+        xhr.responseType = 'json';
+
+        xhr.onload = function() {
+          var status = xhr.status;
+
+          if (status == 200) {
+            var data = xhr.response;
+
+            // IE11 hack. It does not parse it automatically.
+            if (typeof data == 'string') {
+              data = JSON.parse(data)
             }
-            data.entrypoints.map(entry => {
-              const extension = entry.split('.').pop();
-              loadFile(`${inlineBuildPath}/${entry}`, extension);
-            });
-          })
-          .catch(error => console.error(error));
+
+            // Run through the manifest files and add them to the DOM.
+            processManifest(data, inlineBuildPath);
+          }
+          else {
+            console.error('status: ' + status);
+          }
+        };
+
+        xhr.send();
+      });
+    }
+
+    function processManifest(data, inlineBuildPath) {
+      if (data.entrypoints === undefined) {
+        console.error('Could not find entrypoints');
+        return;
+      }
+      data.entrypoints.map(function(entry) {
+        var extension = entry.split('.').pop();
+        loadFile(inlineBuildPath + '/' + entry, extension);
       });
     }
 
@@ -44,6 +66,6 @@ Drupal.behaviors.inlineFunnel = {
     window.displayMode = 'inline';
 
     // Load Verisure inline funnel.
-    loadFilesFromManifest(`${funnelHost}`);
+    loadFilesFromManifest(funnelHost);
   }
 };
