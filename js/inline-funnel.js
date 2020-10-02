@@ -33,20 +33,17 @@ Drupal.behaviors.inlineFunnel = {
               loadFile(`${inlineBuildPath}/${entry}`, extension);
             });
           })
-          //.catch(error => console.error(error))
-          .catch(function() {
-             console.log('error');
-          });
+          .catch(error => console.error(error));
       });
     }
 
     const funnelHost = settings.inline_funnel.funnel_host;
 
+    // Set variables for the inline funnel to read.
     window.funnelHost = funnelHost;
     window.displayMode = 'inline';
 
     // Load Verisure inline funnel.
-    //loadFilesFromManifest(`${funnelHost}/inline/verisure`);
     loadFilesFromManifest(`${funnelHost}`);
   }
 };
