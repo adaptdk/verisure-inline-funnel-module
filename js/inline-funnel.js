@@ -22,7 +22,7 @@ Drupal.behaviors.inlineFunnel = {
     function loadFilesFromManifest(inlineBuildPath) {
       window.addEventListener('DOMContentLoaded', function(event) {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', inlineBuildPath + '/asset-manifest.json', true);
+        xhr.open('GET', inlineBuildPath + '/asset-manifest.json?' + Date.now(), true);
         xhr.responseType = 'json';
 
         xhr.onload = function() {
