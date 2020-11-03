@@ -59,13 +59,64 @@ Drupal.behaviors.inlineFunnel = {
       });
     }
 
+    /**
+     * Fetch and display a message in the div container for unsupported browsers.
+     */
+    function loadUnsupportedBrowserInfo(funnelHost) {
+      window.addEventListener('DOMContentLoaded', function(event) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', funnelHost + '/browser-not-supported/description?' + Date.now(), true);
+        xhr.responseType = 'json';
+
+        xhr.onload = function() {
+          var status = xhr.status;
+
+          if (status == 200) {
+            var data = xhr.response;
+
+            // IE11 hack. It does not parse it automatically.
+            if (typeof data == 'string') {
+              data = JSON.parse(data)
+            }
+
+            document.getElementById('funnel').innerHTML = data.html;
+          }
+          else {
+            console.error('status: ' + status);
+          }
+        };
+
+        xhr.send();
+      });
+    }
+
+    /**
+     * Check if current browser is whitelisted.
+     *
+     * @return boolean
+     */
+    function browserIsSupported() {
+      // IE 10 and 11.
+      if (/Trident\/|MSIE/.test(window.navigator.userAgent)) {
+        return false;
+      }
+
+      return true;
+    }
+
     const funnelHost = settings.inline_funnel.funnel_host;
 
     // Set variables for the inline funnel to read.
     window.funnelHost = funnelHost;
     window.displayMode = 'inline';
 
-    // Load Verisure inline funnel.
-    loadFilesFromManifest(funnelHost);
+    // Load Verisure inline funnel if browser is supported.
+    if (browserIsSupported()) {
+      loadFilesFromManifest(funnelHost);
+    }
+    // Else fetch and display a message to the users.
+    else {
+      loadUnsupportedBrowserInfo(funnelHost);
+    }
   }
 };
