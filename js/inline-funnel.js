@@ -2,6 +2,14 @@
 
 Drupal.behaviors.inlineFunnel = {
   attach: function (context, settings) {
+
+    /**
+     * Inject given asset files read from manifest.
+     *
+     * @param string path
+     * @param string type
+     * @return void
+     */
     function loadFile(path, type){
       if (type === "js"){
         var script = document.createElement('script');
@@ -19,10 +27,18 @@ Drupal.behaviors.inlineFunnel = {
       }
     }
 
-    function loadFilesFromManifest(inlineBuildPath) {
+    /**
+     * Load data from endpoint by given host and path and process result by callback.
+     *
+     * @param string funnelHost
+     * @param string path
+     * @param function callback
+     * @return void
+     */
+    function loadFilesFromManifest(funnelHost, path, callback) {
       window.addEventListener('DOMContentLoaded', function(event) {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', inlineBuildPath + '/asset-manifest.json?' + Date.now(), true);
+        xhr.open('GET', funnelHost + '/' + path + '?' + Date.now(), true);
         xhr.responseType = 'json';
 
         xhr.onload = function() {
@@ -36,8 +52,8 @@ Drupal.behaviors.inlineFunnel = {
               data = JSON.parse(data)
             }
 
-            // Run through the manifest files and add them to the DOM.
-            processManifest(data, inlineBuildPath);
+            // Pass result to callback function.
+            callback(data, funnelHost);
           }
           else {
             console.error('status: ' + status);
@@ -48,46 +64,35 @@ Drupal.behaviors.inlineFunnel = {
       });
     }
 
-    function processManifest(data, inlineBuildPath) {
+    /**
+     * Load asset files from manifest to initialize react app.
+     *
+     * @param object data
+     * @param string funnelHost
+     * @return void
+     */
+    function processManifest(data, funnelHost) {
       if (data.entrypoints === undefined) {
         console.error('Could not find entrypoints');
         return;
       }
       data.entrypoints.map(function(entry) {
         var extension = entry.split('.').pop();
-        loadFile(inlineBuildPath + '/' + entry, extension);
+        loadFile(funnelHost + '/' + entry, extension);
       });
     }
 
     /**
-     * Fetch and display a message in the div container for unsupported browsers.
+     * Display a message in the div container for unsupported browsers.
+     *
+     * @param object data
+     * @param string funnelHost
+     * @return void
      */
-    function loadUnsupportedBrowserInfo(funnelHost) {
-      window.addEventListener('DOMContentLoaded', function(event) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', funnelHost + '/browser-not-supported/description?' + Date.now(), true);
-        xhr.responseType = 'json';
-
-        xhr.onload = function() {
-          var status = xhr.status;
-
-          if (status == 200) {
-            var data = xhr.response;
-
-            // IE11 hack. It does not parse it automatically.
-            if (typeof data == 'string') {
-              data = JSON.parse(data)
-            }
-
-            document.getElementById('funnel').innerHTML = data.html;
-          }
-          else {
-            console.error('status: ' + status);
-          }
-        };
-
-        xhr.send();
-      });
+    function unsupportedBrowserDescription(data, funnelHost) {
+      if (typeof data.html !== 'undefined') {
+        document.getElementById('funnel').innerHTML = data.html;
+      }
     }
 
     /**
@@ -104,6 +109,7 @@ Drupal.behaviors.inlineFunnel = {
       return true;
     }
 
+    // Initialize funnel host from configuration on Drupal block.
     const funnelHost = settings.inline_funnel.funnel_host;
 
     // Set variables for the inline funnel to read.
@@ -112,11 +118,11 @@ Drupal.behaviors.inlineFunnel = {
 
     // Load Verisure inline funnel if browser is supported.
     if (browserIsSupported()) {
-      loadFilesFromManifest(funnelHost);
+      loadFilesFromManifest(funnelHost, 'asset-manifest.json', processManifest);
     }
     // Else fetch and display a message to the users.
     else {
-      loadUnsupportedBrowserInfo(funnelHost);
+      loadFilesFromManifest(funnelHost, 'browser-not-supported/description', unsupportedBrowserDescription);
     }
   }
 };
