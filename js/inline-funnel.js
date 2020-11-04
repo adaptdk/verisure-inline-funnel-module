@@ -35,7 +35,7 @@ Drupal.behaviors.inlineFunnel = {
      * @param function callback
      * @return void
      */
-    function loadFilesFromManifest(funnelHost, path, callback) {
+    function fetchData(funnelHost, path, callback) {
       window.addEventListener('DOMContentLoaded', function(event) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', funnelHost + '/' + path + '?' + Date.now(), true);
@@ -116,13 +116,13 @@ Drupal.behaviors.inlineFunnel = {
     window.funnelHost = funnelHost;
     window.displayMode = 'inline';
 
-    // Load Verisure inline funnel if browser is supported.
+    // Fetch and initialize Verisure inline funnel if browser is supported.
     if (browserIsSupported()) {
-      loadFilesFromManifest(funnelHost, 'asset-manifest.json', processManifest);
+      fetchData(funnelHost, 'asset-manifest.json', processManifest);
     }
     // Else fetch and display a message to the users.
     else {
-      loadFilesFromManifest(funnelHost, 'browser-not-supported/description', unsupportedBrowserDescription);
+      fetchData(funnelHost, 'browser-not-supported/description', unsupportedBrowserDescription);
     }
   }
 };
