@@ -115,6 +115,8 @@ Drupal.behaviors.inlineFunnel = {
     // Set variables for the inline funnel to read.
     window.funnelHost = funnelHost;
     window.displayMode = 'inline';
+    // Add optional parameters, such as fcon normaly sent through the query string to the funnel.
+    window.funnelParams = settings.inline_funnel.funnel_params;
 
     // Fetch and initialize Verisure inline funnel if browser is supported.
     if (browserIsSupported()) {

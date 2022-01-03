@@ -25,6 +25,11 @@ class InlineFunnel extends BlockBase implements BlockPluginInterface
         $config = $this->getConfiguration();
 
         if (isset($config['funnel_host'])) {
+
+            $funnelParams = [
+                'fcon' => empty($config['funnel_fcon']) ? null : $config['funnel_fcon'],
+            ];
+
             return [
                 '#markup' => '<div id="funnel"></div>',
                 '#attached' => [
@@ -34,6 +39,7 @@ class InlineFunnel extends BlockBase implements BlockPluginInterface
                     'drupalSettings' => [
                         'inline_funnel' => [
                             'funnel_host' => $config['funnel_host'],
+                            'funnel_params' => array_filter($funnelParams),
                         ],
                     ],
                 ],
@@ -55,8 +61,16 @@ class InlineFunnel extends BlockBase implements BlockPluginInterface
         $form['funnel_host'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Funnel host'),
+            '#required' => TRUE,
             '#description' => $this->t('What is the hostname of the inline funnel? (Includes http(s) prefix).'),
             '#default_value' => $config['funnel_host'] ?? '',
+        ];
+
+        $form['funnel_fcon'] = [
+            '#type' => 'textfield',
+            '#title' => $this->t('Optional fcon parameter'),
+            '#description' => $this->t('Add an optional fcon parameter to the inline funnel.'),
+            '#default_value' => $config['funnel_fcon'] ?? '',
         ];
 
         return $form;
@@ -70,5 +84,6 @@ class InlineFunnel extends BlockBase implements BlockPluginInterface
         parent::blockSubmit($form, $form_state);
         $values = $form_state->getValues();
         $this->configuration['funnel_host'] = $values['funnel_host'];
+        $this->configuration['funnel_fcon'] = $values['funnel_fcon'];
     }
 }
